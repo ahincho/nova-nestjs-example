@@ -1,0 +1,14 @@
+{
+  "extends": "@ahincho/nova-tsconfig/nestjs.json",
+  "compilerOptions": {
+    // Explicito porque TypeScript 6 ya no lo infiere: cuando ts-jest compila
+    // solo el archivo de test, el directorio comun pasa a ser ./test y el
+    // compilador corta con TS5011. El build real usa tsconfig.build.json, que
+    // lo estrecha a ./src.
+    "rootDir": ".",
+    "outDir": "./dist",
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

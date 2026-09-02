@@ -1,0 +1,18 @@
+# pnpm 10+ aborta el install si nadie decidio que hacer con los scripts de
+# instalacion de las dependencias. Ninguno de estos dos hace falta:
+# @parcel/watcher solo acelera el modo --watch de Jest, y unrs-resolver es el
+# binario nativo opcional del resolutor de imports de ESLint.
+allowBuilds:
+  '@parcel/watcher': false
+  unrs-resolver: false
+minimumReleaseAgeExclude:
+  - '@ahincho/nova-api-standard@0.1.0'
+  - '@ahincho/nova-eslint-config@0.1.0'
+  - '@ahincho/nova-jest-preset@0.1.0'
+  - '@ahincho/nova-nestjs-api-standard@0.1.0'
+  - '@ahincho/nova-nestjs-config@0.1.0'
+  - '@ahincho/nova-nestjs-health@0.1.0'
+  - '@ahincho/nova-nestjs-http@0.1.0'
+  - '@ahincho/nova-nestjs-observability@0.1.0 || 0.1.1'
+  - '@ahincho/nova-nestjs@0.1.0 || 0.1.1'
+  - '@ahincho/nova-tsconfig@0.1.0'
