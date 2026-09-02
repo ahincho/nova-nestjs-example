@@ -39,19 +39,19 @@ Un detalle más: `gh auth refresh` renueva el token del CLI, **no** el de
 **`main.ts`, entero:**
 
 ```ts
-import { bootstrap } from "@ahincho/nova-nestjs";
-import { AppModule } from "./app.module";
+import { bootstrap } from '@ahincho/nova-nestjs';
+import { AppModule } from './app.module';
 
 void bootstrap(AppModule, {
-  globalPrefix: "api/v1",
-  cors: { origins: process.env["CORS_ALLOWED_ORIGINS"] ?? "" },
+  globalPrefix: 'api/v1',
+  cors: { origins: process.env['CORS_ALLOWED_ORIGINS'] ?? '' },
 });
 ```
 
 **Un upstream, entero:**
 
 ```ts
-export const academic = defineUpstream("academic", { defaultTimeoutMs: 3000 });
+export const academic = defineUpstream('academic', { defaultTimeoutMs: 3000 });
 // lee ACADEMIC_URL y ACADEMIC_TIMEOUT_MS
 ```
 

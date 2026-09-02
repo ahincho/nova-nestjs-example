@@ -153,9 +153,7 @@ describe('el servicio de ejemplo', () => {
         .expect(200)
         .expect({ status: 'ok' });
 
-      await request(app.getHttpServer())
-        .get('/api/v1/health/live')
-        .expect(404);
+      await request(app.getHttpServer()).get('/api/v1/health/live').expect(404);
     });
 
     it('reportan cada chequeo de disponibilidad por nombre', async () => {
