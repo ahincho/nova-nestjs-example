@@ -22,16 +22,24 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
+
+      # registry-url escribe la credencial en el npmrc de usuario. Hace falta
+      # ademas de la del .npmrc del proyecto: el chequeo de supply-chain policy
+      # de pnpm 11 consulta el registry sin usar la configuracion del proyecto,
+      # y sin esto corta con un 401 despues de haber bajado todo.
       - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: '@ahincho'
 
       - name: Install
         run: pnpm install --frozen-lockfile
         env:
           # GitHub Packages pide token incluso para un paquete publico. El del
           # run alcanza con el permiso packages: read declarado arriba.
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Typecheck
