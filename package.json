@@ -33,6 +33,7 @@
   "devDependencies": {
     "@ahincho/nova-eslint-config": "^0.1.0",
     "@ahincho/nova-jest-preset": "^0.1.0",
+    "@ahincho/nova-schematics": "^0.1.1",
     "@ahincho/nova-tsconfig": "^0.1.0",
     "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^11.0.9",
