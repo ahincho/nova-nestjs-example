@@ -10,36 +10,48 @@ así que si un cambio del framework rompe algo, se ve acá primero.
 ## Arrancar
 
 Los paquetes viven en GitHub Packages, que **pide autenticación incluso para un
-paquete público**. Hace falta un token con `read:packages`:
+paquete público**. La credencial va una sola vez en la configuración de usuario:
 
 ```bash
-export GITHUB_PACKAGES_TOKEN=<token con read:packages>
+pnpm config set "//npm.pkg.github.com/:_authToken" "$(gh auth token)"
 pnpm install
 cp .env.example .env
 pnpm start:dev
 ```
 
-El token se lee de la variable y no se guarda en el repositorio; `.npmrc` sólo
-declara de dónde salen los paquetes.
+El token necesita `read:packages`. Si `gh` no lo tiene todavía:
+
+```bash
+gh auth refresh -h github.com -s read:packages
+```
+
+**La credencial no puede ir en el `.npmrc` de este repositorio.** pnpm se niega
+a expandir una variable de entorno dentro de una credencial que viene de un
+`.npmrc` versionado, y hace bien: alguien podría cambiar la URL del registry en
+un pull request y llevarse el token. El archivo versionado sólo dice de dónde
+salen los paquetes.
+
+Un detalle más: `gh auth refresh` renueva el token del CLI, **no** el de
+`~/.npmrc`. Hay que volver a correr el `pnpm config set` de arriba.
 
 ## Lo que hay que escribir
 
 **`main.ts`, entero:**
 
 ```ts
-import { bootstrap } from '@ahincho/nova-nestjs';
-import { AppModule } from './app.module';
+import { bootstrap } from "@ahincho/nova-nestjs";
+import { AppModule } from "./app.module";
 
 void bootstrap(AppModule, {
-  globalPrefix: 'api/v1',
-  cors: { origins: process.env['CORS_ALLOWED_ORIGINS'] ?? '' },
+  globalPrefix: "api/v1",
+  cors: { origins: process.env["CORS_ALLOWED_ORIGINS"] ?? "" },
 });
 ```
 
 **Un upstream, entero:**
 
 ```ts
-export const academic = defineUpstream('academic', { defaultTimeoutMs: 3000 });
+export const academic = defineUpstream("academic", { defaultTimeoutMs: 3000 });
 // lee ACADEMIC_URL y ACADEMIC_TIMEOUT_MS
 ```
 
@@ -60,17 +72,17 @@ son ahora una dependencia.
 
 Once pruebas, y todas son de integración con la plataforma:
 
-| Qué | Por qué importa |
-|---|---|
-| El sobre envuelve lo que devuelve el controlador | es el contrato que consumen los frontends |
-| Un DTO fallido vuelve con una entrada por campo | el formulario necesita saber qué input resaltar |
-| Un campo que ningún DTO declara se rechaza | un campo ignorado en silencio hace creer que se aplicó un filtro |
-| Un 500 del upstream sale como 502 sin el detalle | el status del upstream describe una topología ajena al cliente |
-| Un 404 que el cliente decidió traducir pasa | `forwardError` es la salida explícita |
-| Las sondas responden fuera de `/api/v1` | mover la ruta es mover el target group |
-| Las sondas no vienen envueltas | el balanceador revisa la **forma** del cuerpo |
-| El id de correlación vuelve en la respuesta | el llamador lo necesita para reportar una falla |
-| El id viaja al upstream sin que nadie lo pase | es el trabajo que la plataforma hace sola |
+| Qué                                              | Por qué importa                                                  |
+| ------------------------------------------------ | ---------------------------------------------------------------- |
+| El sobre envuelve lo que devuelve el controlador | es el contrato que consumen los frontends                        |
+| Un DTO fallido vuelve con una entrada por campo  | el formulario necesita saber qué input resaltar                  |
+| Un campo que ningún DTO declara se rechaza       | un campo ignorado en silencio hace creer que se aplicó un filtro |
+| Un 500 del upstream sale como 502 sin el detalle | el status del upstream describe una topología ajena al cliente   |
+| Un 404 que el cliente decidió traducir pasa      | `forwardError` es la salida explícita                            |
+| Las sondas responden fuera de `/api/v1`          | mover la ruta es mover el target group                           |
+| Las sondas no vienen envueltas                   | el balanceador revisa la **forma** del cuerpo                    |
+| El id de correlación vuelve en la respuesta      | el llamador lo necesita para reportar una falla                  |
+| El id viaja al upstream sin que nadie lo pase    | es el trabajo que la plataforma hace sola                        |
 
 El upstream se reemplaza mockeando `fetch`, que es lo que el cliente HTTP del
 framework usa por dentro.
@@ -95,14 +107,20 @@ corrección llegó acá con ese comando. Antes del bump el log de un 5xx decía
 Ese es el punto entero: la plataforma se actualiza con un número de versión, no
 copiando archivos de un template.
 
+`pnpm-workspace.yaml` excluye `@ahincho/nova-*` de la política de antigüedad
+mínima de pnpm, que rechaza por defecto una versión publicada hace minutos. Esa
+política protege de un mantenedor de un tercero comprometido; estos paquetes los
+publica el mismo equipo desde un workflow que corre la suite antes de subir, y
+sin la exclusión un parche no se podría probar el día que sale.
+
 ## Variables
 
-| Variable | Obligatoria | Para qué |
-|---|---|---|
-| `PORT` | no, 3000 | puerto que escucha |
-| `CORS_ALLOWED_ORIGINS` | no | lista separada por coma; vacía no permite ninguno |
-| `ACADEMIC_URL` | **sí** | upstream; sin ella el servicio no arranca |
-| `ACADEMIC_TIMEOUT_MS` | no, 3000 | timeout de ese upstream |
+| Variable               | Obligatoria | Para qué                                          |
+| ---------------------- | ----------- | ------------------------------------------------- |
+| `PORT`                 | no, 3000    | puerto que escucha                                |
+| `CORS_ALLOWED_ORIGINS` | no          | lista separada por coma; vacía no permite ninguno |
+| `ACADEMIC_URL`         | **sí**      | upstream; sin ella el servicio no arranca         |
+| `ACADEMIC_TIMEOUT_MS`  | no, 3000    | timeout de ese upstream                           |
 
 `ACADEMIC_URL` es obligatoria a propósito: un servicio al que nunca le
 inyectaron la URL muere al arrancar nombrando la variable, en vez de responder
