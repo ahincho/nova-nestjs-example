@@ -93,13 +93,13 @@ pnpm test:e2e
 
 ## Generar en vez de copiar
 
-`@ahincho/nova-schematics` viene como dependencia de desarrollo. Un upstream
+`@ahincho/nova-nestjs-schematics` viene como dependencia de desarrollo. Un upstream
 nuevo son cuatro archivos que solo cambian de nombre entre uno y otro, y
 copiarlos es como aparecen tres versiones distintas del cliente del mismo
 servicio:
 
 ```bash
-pnpm nest g -c @ahincho/nova-schematics upstream schedules
+pnpm nest g -c @ahincho/nova-nestjs-schematics upstream schedules
 # CREATE src/upstream/schedules/schedules.client.spec.ts
 # CREATE src/upstream/schedules/schedules.client.ts
 # CREATE src/upstream/schedules/schedules.config.ts
@@ -109,8 +109,8 @@ pnpm nest g -c @ahincho/nova-schematics upstream schedules
 Un feature, en cualquiera de los dos layouts:
 
 ```bash
-pnpm nest g -c @ahincho/nova-schematics feature enrollments              # acl
-pnpm nest g -c @ahincho/nova-schematics feature courses --style bff
+pnpm nest g -c @ahincho/nova-nestjs-schematics feature enrollments              # acl
+pnpm nest g -c @ahincho/nova-nestjs-schematics feature courses --style bff
 ```
 
 Lo generado compila, pasa el lint de la plataforma y trae sus propios tests

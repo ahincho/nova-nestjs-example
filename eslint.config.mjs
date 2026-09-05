@@ -1,3 +1,3 @@
-import nova from '@ahincho/nova-toolchain/eslint/index.mjs';
+import nova from '@ahincho/nova-nestjs-toolchain/eslint/index.mjs';
 
 export default nova;

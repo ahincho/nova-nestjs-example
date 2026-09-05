@@ -1,5 +1,5 @@
 {
-  "extends": "@ahincho/nova-toolchain/tsconfig/nestjs.json",
+  "extends": "@ahincho/nova-nestjs-toolchain/tsconfig/nestjs.json",
   "compilerOptions": {
     // Explicito porque TypeScript 6 ya no lo infiere: cuando ts-jest compila
     // solo el archivo de test, el directorio comun pasa a ser ./test y el
