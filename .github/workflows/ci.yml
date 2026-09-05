@@ -42,6 +42,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # --frozen-lockfile no revisa los peers: reusa el lockfile tal cual y da
+      # por bueno lo que ya esta resuelto. La barrera de strictPeerDependencies
+      # solo salta en un install que resuelve, o sea en la maquina de quien
+      # agrega la dependencia. Aca hay que pedirla explicitamente.
+      - name: Peers
+        run: pnpm peers check
+
       - name: Lint
         run: pnpm lint
 

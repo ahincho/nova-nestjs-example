@@ -189,6 +189,61 @@ política protege de un mantenedor de un tercero comprometido; estos paquetes lo
 publica el mismo equipo desde un workflow que corre la suite antes de subir, y
 sin la exclusión un parche no se podría probar el día que sale.
 
+## Las versiones de NestJS, en un solo lugar
+
+`package.json` no dice qué versión de NestJS usa: dice `catalog:`. Los rangos
+viven en el bloque `catalog` de `pnpm-workspace.yaml`, uno por paquete.
+
+```jsonc
+// package.json
+"@nestjs/common": "catalog:",
+"@nestjs/core": "catalog:",
+```
+
+Repartidas entre `dependencies` y `devDependencies` era donde empezaba la
+deriva: cada servicio que copiaba este layout elegía su propio parche y nadie
+comparaba. Con el catálogo, subir NestJS es editar una línea.
+
+**El catálogo llega hasta el borde del repositorio.** pnpm no tiene un `extends`
+que lo traiga de un paquete publicado, así que dos servicios distintos siguen
+teniendo cada uno el suyo. Lo que impide que se separen es otra cosa:
+
+```yaml
+# pnpm-workspace.yaml
+strictPeerDependencies: true
+```
+
+`@ahincho/nova-nestjs` declara como peer contra qué NestJS está probada. Con esa
+línea, no cumplirlo deja de ser una advertencia al final del install y pasa a
+romperlo:
+
+```
+✕ unmet peer @nestjs/terminus
+  Installed: 11.1.1
+  Wanted:
+    ^12.0.0:
+      @ahincho/nova-nestjs@0.3.0
+```
+
+Un servicio no puede irse solo al siguiente major de NestJS, ni quedarse atrás
+sin que nadie lo note. El día que la plataforma soporte el 12, lo dice su rango
+de peer y los servicios lo siguen; hasta entonces, el install falla en la
+máquina del desarrollador y no en producción.
+
+**Esa línea sola no alcanza en CI**, y conviene saberlo. `strictPeerDependencies`
+sólo salta en un install que resuelve; `pnpm install --frozen-lockfile`, que es
+lo que corre el pipeline, reusa el lockfile tal cual y da por bueno lo que ya
+está resuelto. Medido:
+
+| Comando                          | Con un peer fuera de rango |
+| -------------------------------- | -------------------------- |
+| `pnpm install`                   | falla                      |
+| `pnpm install --frozen-lockfile` | pasa                       |
+| `pnpm peers check`               | falla                      |
+
+Por eso el pipeline tiene un paso `Peers` que lo pide explícitamente. Sin él, un
+lockfile con una violación adentro entra al repositorio sin que nada la nombre.
+
 ## Variables
 
 | Variable               | Obligatoria | Para qué                                          |
