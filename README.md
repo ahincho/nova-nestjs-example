@@ -44,6 +44,7 @@ import { AppModule } from './app.module';
 
 void bootstrap(AppModule, {
   globalPrefix: 'api/v1',
+  legacyHealthPath: 'api/v1/health',
   cors: { origins: process.env['CORS_ALLOWED_ORIGINS'] ?? '' },
 });
 ```
@@ -68,9 +69,49 @@ list(@Query() query: ListCoursesQuery): Promise<CourseResponse[]> {
 No hay `src/common` ni `src/core`. Los quince archivos que cada servicio copiaba
 son ahora una dependencia.
 
+## Las sondas de salud
+
+Corren sobre [`@nestjs/terminus`](https://docs.nestjs.com/recipes/terminus). Lo
+que este servicio declara son tres cosas, y ninguna es el runner:
+
+```ts
+health: {
+  legacyPath: 'api/v1/health',
+  gracefulShutdownTimeoutMs: 5000,
+  readinessChecks: [
+    { name: 'academic', check: () => Boolean(process.env['ACADEMIC_URL']) },
+  ],
+}
+```
+
+| Ruta             | Qué contesta                                                     |
+| ---------------- | ---------------------------------------------------------------- |
+| `/health/live`   | si el proceso está vivo, sin tocar ninguna dependencia           |
+| `/health/ready`  | los chequeos, en el cuerpo estándar de terminus; 503 si uno cae  |
+| `/api/v1/health` | la ruta heredada, igual que `ready`, para el target group de hoy |
+
+**`legacyPath` es lo que permite migrar sin tocar la infraestructura.** Un
+servicio que ya está desplegado tiene un target group apuntando a
+`/api/v1/health`; moverlo es recrearlo. Sirviendo las dos en paralelo, la
+infraestructura cambia después, y a su ritmo. Tiene que ir además en el
+`legacyHealthPath` de `bootstrap()`, que es lo que la deja fuera del prefijo
+global.
+
+**`gracefulShutdownTimeoutMs` es la ventana del despliegue.** Tras SIGTERM el
+proceso sigue vivo, pero `ready` y la ruta heredada pasan a 503 durante esos
+cinco segundos: el balanceador saca la tarea de rotación antes de que el
+proceso cierre. Sin esa ventana, las peticiones en vuelo del final de cada
+despliegue mueren. Conviene mayor al intervalo de la sonda del target group y
+menor al `stopTimeout` de la tarea.
+
+Un chequeo de disponibilidad **no llama al upstream a propósito**. Si `ready`
+cayera cuando `academic` se cae, el orquestador reiniciaría tareas sanas de este
+servicio por un problema ajeno, y una caída de un upstream se convertiría en una
+caída de todo lo que depende de él.
+
 ## Lo que se prueba en `test/app.e2e-spec.ts`
 
-Once pruebas, y todas son de integración con la plataforma:
+Catorce pruebas, y todas son de integración con la plataforma:
 
 | Qué                                              | Por qué importa                                                  |
 | ------------------------------------------------ | ---------------------------------------------------------------- |
@@ -80,6 +121,10 @@ Once pruebas, y todas son de integración con la plataforma:
 | Un 500 del upstream sale como 502 sin el detalle | el status del upstream describe una topología ajena al cliente   |
 | Un 404 que el cliente decidió traducir pasa      | `forwardError` es la salida explícita                            |
 | Las sondas responden fuera de `/api/v1`          | mover la ruta es mover el target group                           |
+| `ready` reporta cada chequeo por nombre          | un 503 sin decir cuál obliga a entrar al contenedor              |
+| La ruta heredada contesta igual que `ready`      | es la que hoy decide si la tarea recibe tráfico                  |
+| Un chequeo caído sale 503, no 200                | un flag en `false` dentro de un 200 el balanceador no lo mira    |
+| `live` sigue arriba con `ready` caída            | reiniciar el contenedor no levanta al upstream                   |
 | Las sondas no vienen envueltas                   | el balanceador revisa la **forma** del cuerpo                    |
 | El id de correlación vuelve en la respuesta      | el llamador lo necesita para reportar una falla                  |
 | El id viaja al upstream sin que nadie lo pase    | es el trabajo que la plataforma hace sola                        |
@@ -90,6 +135,12 @@ framework usa por dentro.
 ```bash
 pnpm test:e2e
 ```
+
+El script llama a Jest a través de `node --experimental-vm-modules`, y el
+`engines` pide Node 24.9. terminus 12 se publica sólo como ESM: Node lo carga
+sin problema desde un CommonJS, pero Jest necesita esa bandera y esa versión
+para hacerlo. Es la razón por la que este repositorio quedó en Node 24, y el
+motivo por el que el runner está en revisión.
 
 ## Generar en vez de copiar
 

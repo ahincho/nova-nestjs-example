@@ -29,7 +29,7 @@ jobs:
       # y sin esto corta con un 401 despues de haber bajado todo.
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: https://npm.pkg.github.com
           scope: '@ahincho'
@@ -41,6 +41,12 @@ jobs:
           # run alcanza con el permiso packages: read declarado arriba.
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format
+        run: pnpm format:check
 
       - name: Typecheck
         run: pnpm typecheck
