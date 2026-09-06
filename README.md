@@ -208,13 +208,13 @@ El `package.json` de este servicio, entero:
 }
 ```
 
-NestJS no aparece. Vitest, TypeScript, ESLint y Prettier tampoco.
+NestJS no aparece. Vitest, TypeScript, oxlint y Prettier tampoco.
 
 | Qué                                                                | De dónde llega                   |
 | ------------------------------------------------------------------ | -------------------------------- |
 | `@nestjs/common`, `core`, `config`, `platform-express`, `terminus` | `@ahincho/nova-nestjs`           |
 | `class-validator`, `class-transformer`, `reflect-metadata`, `rxjs` | `@ahincho/nova-nestjs`           |
-| TypeScript, ESLint, Prettier, Vitest, los `@types`                 | `@ahincho/nova-nestjs-toolchain` |
+| TypeScript, oxlint, Prettier, Vitest, los `@types`                 | `@ahincho/nova-nestjs-toolchain` |
 | el CLI de NestJS, `@nestjs/testing`, supertest                     | `@ahincho/nova-nestjs-toolchain` |
 
 Antes eran veinticuatro rangos escritos en este repositorio, y cada servicio que
@@ -239,7 +239,8 @@ publicHoistPattern:
   - class-transformer
   - typescript
   - vitest
-  - eslint
+  - oxlint
+  - oxlint-tsgolint
   - prettier
   - supertest
 ```
@@ -250,13 +251,20 @@ haría falta, porque no aíslan.
 
 ### Lo que todavía nombra la herramienta
 
-Los scripts. `"test": "vitest run"`, `"lint": "eslint ."`. Esta migración lo
-demostró: cambiar de runner obligó a tocar el `package.json`, el
-`pnpm-workspace.yaml` y el `tsconfig.json` de este repositorio, y eso mismo
-tendría que repetirlo cada servicio.
+Los scripts. `"test": "vitest run"`, `"lint": "oxlint --type-aware"`. Las dos
+migraciones seguidas lo demostraron: cambiar de runner obligó a tocar el
+`package.json`, el `pnpm-workspace.yaml` y el `tsconfig.json`, y cambiar de
+linter obligó a tocar el `package.json`, el `pnpm-workspace.yaml` y a
+reemplazar un archivo de configuración por otro. Eso mismo tendría que
+repetirlo cada servicio, dos veces.
 
 Esconderlo detrás de un comando propio, como hace Orbit en frontend con
-`orbit test`, es lo que lo cerraría. Está planteado y no hecho.
+`orbit test` y `orbit quality`, es lo que lo cerraría. Está planteado y no
+hecho, y ya hay dos migraciones de evidencia de que hace falta.
+
+La bandera `--type-aware` es parte del problema: **sin ella oxlint no corre las
+23 reglas que necesitan tipos, y no avisa.** El reporte sale verde con la mitad
+del análisis sin hacer. Un comando propio la pondría siempre.
 
 ### El chequeo de peers sigue puesto
 

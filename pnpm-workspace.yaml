@@ -1,10 +1,3 @@
-# pnpm 10+ aborta el install si nadie decidio que hacer con los scripts de
-# instalacion de las dependencias. No hace falta: unrs-resolver es el binario
-# nativo opcional del resolutor de imports de ESLint, que cae a su
-# implementacion en JavaScript cuando no esta compilado.
-allowBuilds:
-  unrs-resolver: false
-
 # pnpm rechaza por defecto una version publicada hace muy poco: es la defensa
 # contra un mantenedor comprometido que publica algo malicioso y lo ve instalado
 # al instante. La politica cuida de terceros, y estos paquetes son propios - los
@@ -36,6 +29,7 @@ publicHoistPattern:
   - class-transformer
   - typescript
   - vitest
-  - eslint
+  - oxlint
+  - oxlint-tsgolint
   - prettier
   - supertest

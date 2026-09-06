@@ -6,7 +6,7 @@
   "license": "EPL-2.0",
   "packageManager": "pnpm@11.24.0",
   "engines": {
-    "node": ">=24.9"
+    "node": ">=24"
   },
   "scripts": {
     "build": "nest build",
@@ -15,15 +15,15 @@
     "start:prod": "node dist/main",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint .",
+    "lint": "oxlint --type-aware",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@ahincho/nova-nestjs": "^0.6.0"
+    "@ahincho/nova-nestjs": "^0.7.0"
   },
   "devDependencies": {
-    "@ahincho/nova-nestjs-schematics": "^0.6.0",
-    "@ahincho/nova-nestjs-toolchain": "^0.6.0"
+    "@ahincho/nova-nestjs-schematics": "^0.7.0",
+    "@ahincho/nova-nestjs-toolchain": "^0.7.0"
   }
 }
