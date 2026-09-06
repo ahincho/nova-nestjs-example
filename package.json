@@ -21,20 +21,11 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@ahincho/nova-nestjs": "^0.3.0",
-    "@nestjs/common": "catalog:",
-    "@nestjs/config": "catalog:",
-    "@nestjs/core": "catalog:",
-    "@nestjs/platform-express": "catalog:",
-    "@nestjs/terminus": "catalog:",
-    "class-transformer": "catalog:",
-    "class-validator": "catalog:",
-    "reflect-metadata": "catalog:",
-    "rxjs": "catalog:"
+    "@ahincho/nova-nestjs": "^0.4.0"
   },
   "devDependencies": {
-    "@ahincho/nova-nestjs-schematics": "^0.3.0",
-    "@ahincho/nova-nestjs-toolchain": "^0.3.0",
+    "@ahincho/nova-nestjs-schematics": "^0.4.0",
+    "@ahincho/nova-nestjs-toolchain": "^0.4.0",
     "@nestjs/cli": "catalog:",
     "@nestjs/schematics": "catalog:",
     "@nestjs/testing": "catalog:",
