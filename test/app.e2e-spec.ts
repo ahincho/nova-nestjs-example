@@ -178,7 +178,7 @@ describe('the example service', () => {
         .expect(404);
 
       expect(bodyOf<Envelope<null>>(response).errors[0]).toEqual({
-        code: 'NOT_FOUND',
+        code: 'COURSE_NOT_FOUND',
         message: 'Curso MAT999 no encontrado',
         field: null,
       });

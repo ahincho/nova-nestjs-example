@@ -143,8 +143,12 @@ necesitaba su propio `testRegex` y su propia transformación.
 El runner es Vitest. Antes era Jest a través de
 `node --experimental-vm-modules`: terminus 12 se publica sólo como ESM, y Jest
 necesitaba esa bandera -y Node 24.9- para cargarlo desde un CommonJS. Vitest es
-ESM nativo, así que la bandera desaparece del script. Deja de importar cuando
-NestJS 12 publique su núcleo como ESM y esa bandera pase de sostener una
+ESM nativo, así que la bandera desaparece del script.
+
+**Eso dejó de ser una comodidad al subir a NestJS 12**, que publica todo su
+núcleo como ESM sin build de CommonJS. Este servicio sigue siendo CommonJS y lo
+consume con `require(esm)`, que es el camino que el propio `nest upgrade` asume:
+no migra proyectos a ESM. Con Jest la bandera habría pasado de sostener una
 dependencia a sostener el framework entero.
 
 ## Generar en vez de copiar

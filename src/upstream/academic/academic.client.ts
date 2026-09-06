@@ -40,7 +40,13 @@ export class AcademicClient {
       );
     } catch (error) {
       if (error instanceof UpstreamHttpError && error.statusCode === 404) {
-        throw new NotFoundException(`Curso ${id} no encontrado`);
+        // El `errorCode` es de NestJS 12 y es lo que deja que el sobre diga
+        // COURSE_NOT_FOUND en vez del NOT_FOUND generico que sale del status,
+        // sin escribir una excepcion propia. El filtro global de la plataforma
+        // lo lee.
+        throw new NotFoundException(`Curso ${id} no encontrado`, {
+          errorCode: 'COURSE_NOT_FOUND',
+        });
       }
       throw error;
     }
