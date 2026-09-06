@@ -189,59 +189,81 @@ política protege de un mantenedor de un tercero comprometido; estos paquetes lo
 publica el mismo equipo desde un workflow que corre la suite antes de subir, y
 sin la exclusión un parche no se podría probar el día que sale.
 
-## Una sola dependencia
+## Tres dependencias, las tres de la plataforma
 
-Esta es la sección de runtime del `package.json`, entera:
+El `package.json` de este servicio, entero:
 
 ```jsonc
 "dependencies": {
-  "@ahincho/nova-nestjs": "^0.4.0"
+  "@ahincho/nova-nestjs": "^0.5.0"
+},
+"devDependencies": {
+  "@ahincho/nova-nestjs-schematics": "^0.5.0",
+  "@ahincho/nova-nestjs-toolchain": "^0.5.0"
 }
 ```
 
-NestJS no aparece. `@nestjs/common`, `@nestjs/core`, `@nestjs/config`,
-`@nestjs/platform-express`, `@nestjs/terminus`, `class-validator`,
-`class-transformer`, `reflect-metadata` y `rxjs` llegan dentro de la
-plataforma, en las versiones contra las que ella corre su suite.
+NestJS no aparece. Jest, TypeScript, ESLint y Prettier tampoco.
 
-Antes eran `peerDependencies`: ocho rangos escritos en cada repositorio, que
-cada equipo podía mover por su cuenta. Con la versión adentro del paquete, subir
-NestJS es publicar la plataforma, y **ningún servicio puede quedar en una
-versión que la plataforma nunca probó**.
+| Qué                                                                | De dónde llega                   |
+| ------------------------------------------------------------------ | -------------------------------- |
+| `@nestjs/common`, `core`, `config`, `platform-express`, `terminus` | `@ahincho/nova-nestjs`           |
+| `class-validator`, `class-transformer`, `reflect-metadata`, `rxjs` | `@ahincho/nova-nestjs`           |
+| TypeScript, ESLint, Prettier, Jest, ts-jest, los `@types`          | `@ahincho/nova-nestjs-toolchain` |
+| el CLI de NestJS, `@nestjs/testing`, supertest                     | `@ahincho/nova-nestjs-toolchain` |
+
+Antes eran veinticuatro rangos escritos en este repositorio, y cada servicio que
+copiara el layout elegía los suyos. Ahora las versiones están adentro de los
+paquetes: subir NestJS o cambiar de linter es publicar la plataforma, y
+**ningún servicio puede quedar en algo que la plataforma nunca probó**.
 
 ### Cuesta una línea, y no es opcional
 
 pnpm aísla `node_modules`, así que un paquete que entra por transitividad no se
-puede importar. Sin esto, el primer `import { Module } from '@nestjs/common'`
-corta con `TS2307`:
+puede importar ni expone su binario. Sin esto no existen `tsc` ni `jest`, y el
+primer `import { Module } from '@nestjs/common'` corta con `TS2307`:
 
 ```yaml
 # pnpm-workspace.yaml
 publicHoistPattern:
   - '@nestjs/*'
+  - '@types/*'
   - rxjs
   - reflect-metadata
   - class-validator
   - class-transformer
+  - typescript
+  - jest
+  - ts-jest
+  - eslint
+  - prettier
+  - supertest
 ```
 
 Es la contrapartida honesta del modelo: se gana que nadie elija la versión, se
 pierde el aislamiento estricto de pnpm para esos paquetes. Con npm o yarn no
 haría falta, porque no aíslan.
 
-### Lo que queda declarado
+### Lo que todavía nombra la herramienta
 
-Las quince dependencias de desarrollo: `@nestjs/cli` para compilar, `jest`,
-`typescript`, `eslint`, `prettier`, los `@types` y `supertest`. Sus versiones
-viven en el bloque `catalog`, que es lo único que le queda.
+Los scripts. `"test": "jest"`, `"lint": "eslint ."`, y el
+`--experimental-vm-modules` que arrastra terminus. Así que el día que la
+plataforma cambie de runner, hay que tocar el `package.json` de cada servicio
+igual.
 
-`strictPeerDependencies: true` sigue puesto y sigue haciendo falta. `@nestjs/testing`
-y `ts-jest` sí declaran peers, y es lo que atrapa a un servicio que ponga
-`@nestjs/testing` 12 mientras la plataforma trae NestJS 11.
+Esconderlo detrás de un comando propio, como hace Orbit en frontend con
+`orbit test`, es lo que lo cerraría. Está planteado y no hecho.
 
-**Esa línea sola no alcanza en CI**, y conviene saberlo. Sólo salta en un
-install que resuelve; `pnpm install --frozen-lockfile`, que es lo que corre el
-pipeline, reusa el lockfile tal cual. Medido:
+### El chequeo de peers sigue puesto
+
+Ya no queda ninguna versión declarada acá, pero los paquetes que llegan por
+transitividad sí tienen peers entre ellos: ts-jest con jest y TypeScript,
+`@nestjs/testing` con `@nestjs/common`. El chequeo avisa si la plataforma
+publica alguna vez una combinación que no cierra.
+
+**No alcanza con `strictPeerDependencies` en CI**, y conviene saberlo. Sólo
+salta en un install que resuelve; `pnpm install --frozen-lockfile`, que es lo
+que corre el pipeline, reusa el lockfile tal cual. Medido:
 
 | Comando                          | Con un peer fuera de rango |
 | -------------------------------- | -------------------------- |

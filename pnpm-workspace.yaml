@@ -16,27 +16,28 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@ahincho/nova-*'
 
-# Lo que queda del catalogo es solo herramienta de desarrollo. Las versiones
-# de runtime -NestJS, class-validator, rxjs, reflect-metadata, terminus- ya no
-# se declaran aca: llegan dentro de @ahincho/nova-nestjs, que es el unico
-# paquete de `dependencies`.
-catalog:
-  '@nestjs/cli': ^11.0.10
-  '@nestjs/schematics': ^11.0.9
-  '@nestjs/testing': ^11.2.1
-
-# Sigue haciendo falta aunque el runtime ya no se declare: @nestjs/testing y
-# ts-jest si tienen peers, y esto es lo que atrapa a un servicio que declare
-# @nestjs/testing 12 mientras la plataforma trae NestJS 11.
+# Ya no queda ninguna version declarada en este repositorio, pero los paquetes
+# que llegan por transitividad si tienen peers entre ellos -ts-jest con jest y
+# typescript, @nestjs/testing con @nestjs/common- y esto es lo que avisa si la
+# plataforma alguna vez publica una combinacion que no cierra.
 strictPeerDependencies: true
 
-# NestJS llega dentro de @ahincho/nova-nestjs, y pnpm aisla node_modules: un
-# paquete que entra por transitividad no se puede importar. Sin esto, el
-# `import { Module } from '@nestjs/common'` de cualquier modulo corta con
-# TS2307. Es la contrapartida de que el servicio no elija la version.
+# Todo lo que este servicio usa llega dentro de los tres paquetes de la
+# plataforma, y pnpm aisla node_modules: un paquete transitivo no se puede
+# importar ni expone su binario. Sin esto no existen `tsc` ni `jest`, y el
+# `import { Module } from '@nestjs/common'` corta con TS2307.
+#
+# Es la contrapartida de que el servicio no elija ninguna version.
 publicHoistPattern:
   - '@nestjs/*'
+  - '@types/*'
   - rxjs
   - reflect-metadata
   - class-validator
   - class-transformer
+  - typescript
+  - jest
+  - ts-jest
+  - eslint
+  - prettier
+  - supertest
