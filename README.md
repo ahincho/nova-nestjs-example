@@ -133,14 +133,19 @@ El upstream se reemplaza mockeando `fetch`, que es lo que el cliente HTTP del
 framework usa por dentro.
 
 ```bash
-pnpm test:e2e
+pnpm test
 ```
 
-El script llama a Jest a través de `node --experimental-vm-modules`, y el
-`engines` pide Node 24.9. terminus 12 se publica sólo como ESM: Node lo carga
-sin problema desde un CommonJS, pero Jest necesita esa bandera y esa versión
-para hacerlo. Es la razón por la que este repositorio quedó en Node 24, y el
-motivo por el que el runner está en revisión.
+Un solo archivo de configuración cubre las dos ubicaciones, `src/**/*.spec.ts`
+y `test/**/*.e2e-spec.ts`. Con Jest hacían falta dos, porque cada suite
+necesitaba su propio `testRegex` y su propia transformación.
+
+El runner es Vitest. Antes era Jest a través de
+`node --experimental-vm-modules`: terminus 12 se publica sólo como ESM, y Jest
+necesitaba esa bandera -y Node 24.9- para cargarlo desde un CommonJS. Vitest es
+ESM nativo, así que la bandera desaparece del script. Deja de importar cuando
+NestJS 12 publique su núcleo como ESM y esa bandera pase de sostener una
+dependencia a sostener el framework entero.
 
 ## Generar en vez de copiar
 
@@ -195,21 +200,21 @@ El `package.json` de este servicio, entero:
 
 ```jsonc
 "dependencies": {
-  "@ahincho/nova-nestjs": "^0.5.0"
+  "@ahincho/nova-nestjs": "^0.6.0"
 },
 "devDependencies": {
-  "@ahincho/nova-nestjs-schematics": "^0.5.0",
-  "@ahincho/nova-nestjs-toolchain": "^0.5.0"
+  "@ahincho/nova-nestjs-schematics": "^0.6.0",
+  "@ahincho/nova-nestjs-toolchain": "^0.6.0"
 }
 ```
 
-NestJS no aparece. Jest, TypeScript, ESLint y Prettier tampoco.
+NestJS no aparece. Vitest, TypeScript, ESLint y Prettier tampoco.
 
 | Qué                                                                | De dónde llega                   |
 | ------------------------------------------------------------------ | -------------------------------- |
 | `@nestjs/common`, `core`, `config`, `platform-express`, `terminus` | `@ahincho/nova-nestjs`           |
 | `class-validator`, `class-transformer`, `reflect-metadata`, `rxjs` | `@ahincho/nova-nestjs`           |
-| TypeScript, ESLint, Prettier, Jest, ts-jest, los `@types`          | `@ahincho/nova-nestjs-toolchain` |
+| TypeScript, ESLint, Prettier, Vitest, los `@types`                 | `@ahincho/nova-nestjs-toolchain` |
 | el CLI de NestJS, `@nestjs/testing`, supertest                     | `@ahincho/nova-nestjs-toolchain` |
 
 Antes eran veinticuatro rangos escritos en este repositorio, y cada servicio que
@@ -220,7 +225,7 @@ paquetes: subir NestJS o cambiar de linter es publicar la plataforma, y
 ### Cuesta una línea, y no es opcional
 
 pnpm aísla `node_modules`, así que un paquete que entra por transitividad no se
-puede importar ni expone su binario. Sin esto no existen `tsc` ni `jest`, y el
+puede importar ni expone su binario. Sin esto no existen `tsc` ni `vitest`, y el
 primer `import { Module } from '@nestjs/common'` corta con `TS2307`:
 
 ```yaml
@@ -233,8 +238,7 @@ publicHoistPattern:
   - class-validator
   - class-transformer
   - typescript
-  - jest
-  - ts-jest
+  - vitest
   - eslint
   - prettier
   - supertest
@@ -246,10 +250,10 @@ haría falta, porque no aíslan.
 
 ### Lo que todavía nombra la herramienta
 
-Los scripts. `"test": "jest"`, `"lint": "eslint ."`, y el
-`--experimental-vm-modules` que arrastra terminus. Así que el día que la
-plataforma cambie de runner, hay que tocar el `package.json` de cada servicio
-igual.
+Los scripts. `"test": "vitest run"`, `"lint": "eslint ."`. Esta migración lo
+demostró: cambiar de runner obligó a tocar el `package.json`, el
+`pnpm-workspace.yaml` y el `tsconfig.json` de este repositorio, y eso mismo
+tendría que repetirlo cada servicio.
 
 Esconderlo detrás de un comando propio, como hace Orbit en frontend con
 `orbit test`, es lo que lo cerraría. Está planteado y no hecho.
@@ -257,8 +261,9 @@ Esconderlo detrás de un comando propio, como hace Orbit en frontend con
 ### El chequeo de peers sigue puesto
 
 Ya no queda ninguna versión declarada acá, pero los paquetes que llegan por
-transitividad sí tienen peers entre ellos: ts-jest con jest y TypeScript,
-`@nestjs/testing` con `@nestjs/common`. El chequeo avisa si la plataforma
+transitividad sí tienen peers entre ellos: `@nestjs/testing` con
+`@nestjs/common`, Vitest con su proveedor de cobertura. El chequeo avisa si la
+plataforma
 publica alguna vez una combinación que no cierra.
 
 **No alcanza con `strictPeerDependencies` en CI**, y conviene saberlo. Sólo

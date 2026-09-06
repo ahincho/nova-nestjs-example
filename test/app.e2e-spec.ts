@@ -5,6 +5,7 @@ import type { App } from 'supertest/types';
 import { validationExceptionFactory } from '@ahincho/nova-nestjs';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
+import type { Mock } from 'vitest';
 
 /**
  * Lo que prueba esta suite es la integración con la plataforma: que el sobre
@@ -51,7 +52,7 @@ type FetchArgs = [input: string, init?: RequestInit];
 
 describe('the example service', () => {
   let app: INestApplication<App>;
-  let fetchMock: jest.Mock<Promise<Response>, FetchArgs>;
+  let fetchMock: Mock<(...args: FetchArgs) => Promise<Response>>;
 
   beforeAll(async () => {
     process.env['ACADEMIC_URL'] = 'http://academic.test';
@@ -83,7 +84,7 @@ describe('the example service', () => {
   });
 
   beforeEach(() => {
-    fetchMock = jest.fn<Promise<Response>, FetchArgs>();
+    fetchMock = vi.fn<(...args: FetchArgs) => Promise<Response>>();
     global.fetch = fetchMock as unknown as typeof fetch;
   });
 

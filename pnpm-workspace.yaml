@@ -1,9 +1,8 @@
 # pnpm 10+ aborta el install si nadie decidio que hacer con los scripts de
-# instalacion de las dependencias. Ninguno de estos dos hace falta:
-# @parcel/watcher solo acelera el modo --watch de Jest, y unrs-resolver es el
-# binario nativo opcional del resolutor de imports de ESLint.
+# instalacion de las dependencias. No hace falta: unrs-resolver es el binario
+# nativo opcional del resolutor de imports de ESLint, que cae a su
+# implementacion en JavaScript cuando no esta compilado.
 allowBuilds:
-  '@parcel/watcher': false
   unrs-resolver: false
 
 # pnpm rechaza por defecto una version publicada hace muy poco: es la defensa
@@ -17,14 +16,14 @@ minimumReleaseAgeExclude:
   - '@ahincho/nova-*'
 
 # Ya no queda ninguna version declarada en este repositorio, pero los paquetes
-# que llegan por transitividad si tienen peers entre ellos -ts-jest con jest y
-# typescript, @nestjs/testing con @nestjs/common- y esto es lo que avisa si la
-# plataforma alguna vez publica una combinacion que no cierra.
+# que llegan por transitividad si tienen peers entre ellos -@nestjs/testing con
+# @nestjs/common, vitest con su proveedor de cobertura- y esto es lo que avisa
+# si la plataforma alguna vez publica una combinacion que no cierra.
 strictPeerDependencies: true
 
 # Todo lo que este servicio usa llega dentro de los tres paquetes de la
 # plataforma, y pnpm aisla node_modules: un paquete transitivo no se puede
-# importar ni expone su binario. Sin esto no existen `tsc` ni `jest`, y el
+# importar ni expone su binario. Sin esto no existen `tsc` ni `vitest`, y el
 # `import { Module } from '@nestjs/common'` corta con TS2307.
 #
 # Es la contrapartida de que el servicio no elija ninguna version.
@@ -36,8 +35,7 @@ publicHoistPattern:
   - class-validator
   - class-transformer
   - typescript
-  - jest
-  - ts-jest
+  - vitest
   - eslint
   - prettier
   - supertest
