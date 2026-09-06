@@ -16,29 +16,27 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@ahincho/nova-*'
 
-# Las versiones de NestJS y de lo que la plataforma declara como peer, en un
-# solo lugar. Repartidas entre dependencies y devDependencies era donde
-# empezaba la deriva: cada servicio elegia su parche y nadie comparaba.
-#
-# El catalogo es por repositorio -pnpm no tiene un `extends` que lo traiga de
-# un paquete publicado-, asi que esto estandariza hacia adentro. Lo que impide
-# que dos servicios queden en NestJS distintos es el bloque de abajo.
+# Lo que queda del catalogo es solo herramienta de desarrollo. Las versiones
+# de runtime -NestJS, class-validator, rxjs, reflect-metadata, terminus- ya no
+# se declaran aca: llegan dentro de @ahincho/nova-nestjs, que es el unico
+# paquete de `dependencies`.
 catalog:
   '@nestjs/cli': ^11.0.10
-  '@nestjs/common': ^11.2.1
-  '@nestjs/config': ^4.0.4
-  '@nestjs/core': ^11.2.1
-  '@nestjs/platform-express': ^11.2.1
   '@nestjs/schematics': ^11.0.9
-  '@nestjs/terminus': ^12.0.0
   '@nestjs/testing': ^11.2.1
-  class-transformer: ^0.5.1
-  class-validator: ^0.14.2
-  reflect-metadata: ^0.2.2
-  rxjs: ^7.8.2
 
-# El rango de peer de @ahincho/nova-nestjs dice contra que NestJS esta probada
-# la plataforma. Con esto, no cumplirlo deja de ser una advertencia al final
-# del install y pasa a romperlo: un servicio no puede irse a NestJS 12 mientras
-# la plataforma declare 11, ni quedarse atras en silencio.
+# Sigue haciendo falta aunque el runtime ya no se declare: @nestjs/testing y
+# ts-jest si tienen peers, y esto es lo que atrapa a un servicio que declare
+# @nestjs/testing 12 mientras la plataforma trae NestJS 11.
 strictPeerDependencies: true
+
+# NestJS llega dentro de @ahincho/nova-nestjs, y pnpm aisla node_modules: un
+# paquete que entra por transitividad no se puede importar. Sin esto, el
+# `import { Module } from '@nestjs/common'` de cualquier modulo corta con
+# TS2307. Es la contrapartida de que el servicio no elija la version.
+publicHoistPattern:
+  - '@nestjs/*'
+  - rxjs
+  - reflect-metadata
+  - class-validator
+  - class-transformer

@@ -189,51 +189,59 @@ política protege de un mantenedor de un tercero comprometido; estos paquetes lo
 publica el mismo equipo desde un workflow que corre la suite antes de subir, y
 sin la exclusión un parche no se podría probar el día que sale.
 
-## Las versiones de NestJS, en un solo lugar
+## Una sola dependencia
 
-`package.json` no dice qué versión de NestJS usa: dice `catalog:`. Los rangos
-viven en el bloque `catalog` de `pnpm-workspace.yaml`, uno por paquete.
+Esta es la sección de runtime del `package.json`, entera:
 
 ```jsonc
-// package.json
-"@nestjs/common": "catalog:",
-"@nestjs/core": "catalog:",
+"dependencies": {
+  "@ahincho/nova-nestjs": "^0.4.0"
+}
 ```
 
-Repartidas entre `dependencies` y `devDependencies` era donde empezaba la
-deriva: cada servicio que copiaba este layout elegía su propio parche y nadie
-comparaba. Con el catálogo, subir NestJS es editar una línea.
+NestJS no aparece. `@nestjs/common`, `@nestjs/core`, `@nestjs/config`,
+`@nestjs/platform-express`, `@nestjs/terminus`, `class-validator`,
+`class-transformer`, `reflect-metadata` y `rxjs` llegan dentro de la
+plataforma, en las versiones contra las que ella corre su suite.
 
-**El catálogo llega hasta el borde del repositorio.** pnpm no tiene un `extends`
-que lo traiga de un paquete publicado, así que dos servicios distintos siguen
-teniendo cada uno el suyo. Lo que impide que se separen es otra cosa:
+Antes eran `peerDependencies`: ocho rangos escritos en cada repositorio, que
+cada equipo podía mover por su cuenta. Con la versión adentro del paquete, subir
+NestJS es publicar la plataforma, y **ningún servicio puede quedar en una
+versión que la plataforma nunca probó**.
+
+### Cuesta una línea, y no es opcional
+
+pnpm aísla `node_modules`, así que un paquete que entra por transitividad no se
+puede importar. Sin esto, el primer `import { Module } from '@nestjs/common'`
+corta con `TS2307`:
 
 ```yaml
 # pnpm-workspace.yaml
-strictPeerDependencies: true
+publicHoistPattern:
+  - '@nestjs/*'
+  - rxjs
+  - reflect-metadata
+  - class-validator
+  - class-transformer
 ```
 
-`@ahincho/nova-nestjs` declara como peer contra qué NestJS está probada. Con esa
-línea, no cumplirlo deja de ser una advertencia al final del install y pasa a
-romperlo:
+Es la contrapartida honesta del modelo: se gana que nadie elija la versión, se
+pierde el aislamiento estricto de pnpm para esos paquetes. Con npm o yarn no
+haría falta, porque no aíslan.
 
-```
-✕ unmet peer @nestjs/terminus
-  Installed: 11.1.1
-  Wanted:
-    ^12.0.0:
-      @ahincho/nova-nestjs@0.3.0
-```
+### Lo que queda declarado
 
-Un servicio no puede irse solo al siguiente major de NestJS, ni quedarse atrás
-sin que nadie lo note. El día que la plataforma soporte el 12, lo dice su rango
-de peer y los servicios lo siguen; hasta entonces, el install falla en la
-máquina del desarrollador y no en producción.
+Las quince dependencias de desarrollo: `@nestjs/cli` para compilar, `jest`,
+`typescript`, `eslint`, `prettier`, los `@types` y `supertest`. Sus versiones
+viven en el bloque `catalog`, que es lo único que le queda.
 
-**Esa línea sola no alcanza en CI**, y conviene saberlo. `strictPeerDependencies`
-sólo salta en un install que resuelve; `pnpm install --frozen-lockfile`, que es
-lo que corre el pipeline, reusa el lockfile tal cual y da por bueno lo que ya
-está resuelto. Medido:
+`strictPeerDependencies: true` sigue puesto y sigue haciendo falta. `@nestjs/testing`
+y `ts-jest` sí declaran peers, y es lo que atrapa a un servicio que ponga
+`@nestjs/testing` 12 mientras la plataforma trae NestJS 11.
+
+**Esa línea sola no alcanza en CI**, y conviene saberlo. Sólo salta en un
+install que resuelve; `pnpm install --frozen-lockfile`, que es lo que corre el
+pipeline, reusa el lockfile tal cual. Medido:
 
 | Comando                          | Con un peer fuera de rango |
 | -------------------------------- | -------------------------- |
@@ -241,8 +249,7 @@ está resuelto. Medido:
 | `pnpm install --frozen-lockfile` | pasa                       |
 | `pnpm peers check`               | falla                      |
 
-Por eso el pipeline tiene un paso `Peers` que lo pide explícitamente. Sin él, un
-lockfile con una violación adentro entra al repositorio sin que nada la nombre.
+Por eso el pipeline tiene un paso `Peers` que lo pide explícitamente.
 
 ## Variables
 
