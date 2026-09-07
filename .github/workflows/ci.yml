@@ -76,6 +76,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # test y no test:cov, a proposito: este repo declara `thresholds: false`
+      # en su vitest.config.mjs porque lo que prueba es la integracion con la
+      # plataforma y no cada rama. Un `test:cov` aca imprimiria un reporte que
+      # no bloquea nada. Un servicio generado si lleva umbral, y por eso su
+      # `verify` corre la variante con cobertura.
       - name: Test
         run: pnpm test
 
@@ -85,22 +90,43 @@ jobs:
       # usa: el 401 por una credencial mal pasada no lo ve nadie. Aca si, que
       # es como la construye un servicio real.
       #
-      # El npmrc que escribe setup-node NO sirve para esto: vive en RUNNER_TEMP
-      # y lleva `${NODE_AUTH_TOKEN}` como marcador, que npm expande al leerlo.
-      # Montado como secreto llegaria el marcador y el build cortaria con un
-      # 401. Se escribe uno con el valor ya resuelto, y viaja montado y no
-      # copiado, asi que no queda en ninguna capa de la imagen.
       # El montaje de cache de BuildKit vive en el runner, y el runner se
       # destruye: sin exportarla, cada build de CI es frio.
       - name: Set up buildx
         uses: docker/setup-buildx-action@v3
 
+      # Antes aca se escribia un npmrc a mano con el token ya resuelto. Desde
+      # 0.13.0 no hace falta: `nova docker` busca el npmrc donde npm lo busca
+      # -NPM_CONFIG_USERCONFIG, que es donde lo dejo setup-node- y resuelve el
+      # ${NODE_AUTH_TOKEN} que ese archivo guarda como marcador. Por eso la
+      # variable tiene que estar en el entorno de ESTE paso.
+      #
+      # --load para que la imagen quede en el daemon y el paso siguiente pueda
+      # levantarla; sin eso buildx la construye y la descarta.
       - name: Docker
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          {
-            echo "@ahincho:registry=https://npm.pkg.github.com"
-            echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN"
-          } > "$RUNNER_TEMP/docker.npmrc"
-          pnpm docker --secret id=npmrc,src="$RUNNER_TEMP/docker.npmrc"             --cache-from type=gha --cache-to type=gha,mode=max
+          pnpm docker --tag nova-nestjs-example:ci --cache-from type=gha --cache-to type=gha,mode=max --load
+
+      # Que construya no prueba que arranque. Esto si, y de paso ejercita que
+      # una sola imagen sirva para los tres ambientes: NODE_ENV es lo que
+      # inyecta la task definition.
+      - name: Run the image
+        run: |
+          set -euo pipefail
+          id=$(docker run --rm --detach --env NODE_ENV=development --publish 3000:3000 nova-nestjs-example:ci)
+          trap 'docker rm --force "$id" > /dev/null' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://localhost:3000/health/live; then
+              echo
+              echo "el contenedor responde"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "el contenedor no respondio en 60 s"
+          docker logs "$id"
+          exit 1

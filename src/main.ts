@@ -1,4 +1,4 @@
-import { bootstrap } from '@ahincho/nova-nestjs';
+import { appEnvironment, bootstrap } from '@ahincho/nova-nestjs';
 import { AppModule } from './app.module';
 
 // El main.ts completo. El ValidationPipe con la fábrica del sobre, el bind a
@@ -19,6 +19,11 @@ void bootstrap(AppModule, {
   openapi: {
     title: 'Nova Example',
     description: 'El servicio de ejemplo de la plataforma',
+
+    // `appEnvironment()` lee NODE_ENV, que es lo que inyecta la task
+    // definition. Sin inyectar nada cae en `production`, el más restrictivo:
+    // un contenedor que nadie configuró no publica la documentación.
+    enabled: appEnvironment() !== 'production',
     // En false porque este servicio no declara `auth`. Con el guard global
     // encendido habría que sacarlo: el documento tiene que decir que todo pide
     // token, porque es lo que pasa de verdad.
