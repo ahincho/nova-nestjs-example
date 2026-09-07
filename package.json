@@ -9,21 +9,21 @@
     "node": ">=24.15"
   },
   "scripts": {
-    "build": "nest build",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "build": "nova build",
+    "start": "nova start",
+    "start:dev": "nova start --watch",
     "start:prod": "node dist/main",
-    "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "oxlint --type-aware",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "test": "nova test",
+    "typecheck": "nova typecheck",
+    "lint": "nova lint",
+    "format": "nova format",
+    "format:check": "nova format:check"
   },
   "dependencies": {
-    "@ahincho/nova-nestjs": "^0.8.1"
+    "@ahincho/nova-nestjs": "^0.10.0"
   },
   "devDependencies": {
-    "@ahincho/nova-nestjs-schematics": "^0.8.1",
-    "@ahincho/nova-nestjs-toolchain": "^0.8.1"
+    "@ahincho/nova-nestjs-schematics": "^0.10.0",
+    "@ahincho/nova-nestjs-toolchain": "^0.10.0"
   }
 }

@@ -16,8 +16,12 @@ strictPeerDependencies: true
 
 # Todo lo que este servicio usa llega dentro de los tres paquetes de la
 # plataforma, y pnpm aisla node_modules: un paquete transitivo no se puede
-# importar ni expone su binario. Sin esto no existen `tsc` ni `vitest`, y el
-# `import { Module } from '@nestjs/common'` corta con TS2307.
+# importar. Sin esto el `import { Module } from '@nestjs/common'` corta con
+# TS2307.
+#
+# La lista es solo de lo que se importa o lo que resuelve el tsconfig. Las
+# herramientas que unicamente se ejecutan -oxlint, tsgolint, prettier- no estan,
+# porque el comando `nova` las resuelve desde el toolchain.
 #
 # Es la contrapartida de que el servicio no elija ninguna version.
 publicHoistPattern:
@@ -29,7 +33,4 @@ publicHoistPattern:
   - class-transformer
   - typescript
   - vitest
-  - oxlint
-  - oxlint-tsgolint
-  - prettier
   - supertest

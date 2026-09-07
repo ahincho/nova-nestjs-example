@@ -212,13 +212,15 @@ El `package.json` de este servicio, entero:
 }
 ```
 
-NestJS no aparece. Vitest, TypeScript, oxlint y Prettier tampoco.
+NestJS no aparece. Vitest, TypeScript, oxlint y Prettier tampoco, ni el
+comando que los ejecuta.
 
 | Qué                                                                | De dónde llega                   |
 | ------------------------------------------------------------------ | -------------------------------- |
 | `@nestjs/common`, `core`, `config`, `platform-express`, `terminus` | `@ahincho/nova-nestjs`           |
 | `class-validator`, `class-transformer`, `reflect-metadata`, `rxjs` | `@ahincho/nova-nestjs`           |
 | TypeScript, oxlint, Prettier, Vitest, los `@types`                 | `@ahincho/nova-nestjs-toolchain` |
+| el comando `nova`, que es lo único que los scripts nombran         | `@ahincho/nova-nestjs-toolchain` |
 | el CLI de NestJS, `@nestjs/testing`, supertest                     | `@ahincho/nova-nestjs-toolchain` |
 
 Antes eran veinticuatro rangos escritos en este repositorio, y cada servicio que
@@ -243,9 +245,6 @@ publicHoistPattern:
   - class-transformer
   - typescript
   - vitest
-  - oxlint
-  - oxlint-tsgolint
-  - prettier
   - supertest
 ```
 
@@ -253,22 +252,33 @@ Es la contrapartida honesta del modelo: se gana que nadie elija la versión, se
 pierde el aislamiento estricto de pnpm para esos paquetes. Con npm o yarn no
 haría falta, porque no aíslan.
 
-### Lo que todavía nombra la herramienta
+### Los scripts ya no nombran la herramienta
 
-Los scripts. `"test": "vitest run"`, `"lint": "oxlint --type-aware"`. Las dos
-migraciones seguidas lo demostraron: cambiar de runner obligó a tocar el
-`package.json`, el `pnpm-workspace.yaml` y el `tsconfig.json`, y cambiar de
-linter obligó a tocar el `package.json`, el `pnpm-workspace.yaml` y a
-reemplazar un archivo de configuración por otro. Eso mismo tendría que
-repetirlo cada servicio, dos veces.
+```json
+{
+  "scripts": {
+    "build": "nova build",
+    "start": "nova start",
+    "test": "nova test",
+    "lint": "nova lint",
+    "typecheck": "nova typecheck",
+    "format": "nova format",
+    "format:check": "nova format:check"
+  }
+}
+```
 
-Esconderlo detrás de un comando propio, como hace Orbit en frontend con
-`orbit test` y `orbit quality`, es lo que lo cerraría. Está planteado y no
-hecho, y ya hay dos migraciones de evidencia de que hace falta.
+Antes decían `vitest run` y `oxlint --type-aware`, y dos migraciones seguidas
+mostraron el costo: cambiar de runner obligó a tocar el `package.json`, el
+`pnpm-workspace.yaml` y el `tsconfig.json` de este repositorio; cambiar de
+linter obligó a tocar dos de esos tres y a reemplazar un archivo de
+configuración. Cada servicio tendría que repetirlo. El día que oxfmt llegue a
+1.0, `nova format` cambia dentro del toolchain y acá no cambia nada.
 
-La bandera `--type-aware` es parte del problema: **sin ella oxlint no corre las
-23 reglas que necesitan tipos, y no avisa.** El reporte sale verde con la mitad
-del análisis sin hacer. Un comando propio la pondría siempre.
+Y hay un motivo que no es comodidad. **Sin `--type-aware`, oxlint no corre las
+23 reglas que necesitan tipos, y no avisa**: el reporte sale verde con la mitad
+del análisis sin hacer. Un script escrito a mano puede perder esa bandera sin
+que nada se rompa; dentro del comando no se puede perder.
 
 ### El chequeo de peers sigue puesto
 
