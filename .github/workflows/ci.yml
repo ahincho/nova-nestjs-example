@@ -85,8 +85,17 @@ jobs:
       # usa: el 401 por una credencial mal pasada no lo ve nadie. Aca si, que
       # es como la construye un servicio real.
       #
-      # setup-node ya dejo el token en el npmrc del usuario, que es el que se
-      # monta como secreto - montado y no copiado, para que no quede en ninguna
-      # capa de la imagen.
+      # El npmrc que escribe setup-node NO sirve para esto: vive en RUNNER_TEMP
+      # y lleva `${NODE_AUTH_TOKEN}` como marcador, que npm expande al leerlo.
+      # Montado como secreto llegaria el marcador y el build cortaria con un
+      # 401. Se escribe uno con el valor ya resuelto, y viaja montado y no
+      # copiado, asi que no queda en ninguna capa de la imagen.
       - name: Docker
-        run: pnpm docker --secret id=npmrc,src=$HOME/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "@ahincho:registry=https://npm.pkg.github.com"
+            echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN"
+          } > "$RUNNER_TEMP/docker.npmrc"
+          pnpm docker --secret id=npmrc,src="$RUNNER_TEMP/docker.npmrc"
