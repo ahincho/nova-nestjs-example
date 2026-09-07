@@ -17,8 +17,18 @@ permissions:
 
 jobs:
   verify:
-    name: verify
+    name: verify (node ${{ matrix.node }})
     runs-on: ubuntu-latest
+
+    # El servicio declara `engines: ">=24.15"`, que permite la linea 26. Es el
+    # servicio de referencia de la plataforma, asi que esa afirmacion tiene que
+    # estar ejercitada y no solo escrita. La 25 queda fuera: es linea impar y
+    # `vitest` 5 la excluye (`^22.12 || ^24 || >=26`).
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [24, 26]
+
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -29,7 +39,7 @@ jobs:
       # y sin esto corta con un 401 despues de haber bajado todo.
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
           cache: pnpm
           registry-url: https://npm.pkg.github.com
           scope: '@ahincho'
