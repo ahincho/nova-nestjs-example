@@ -112,11 +112,20 @@ jobs:
       # Que construya no prueba que arranque. Esto si, y de paso ejercita que
       # una sola imagen sirva para los tres ambientes: NODE_ENV es lo que
       # inyecta la task definition.
+      # Sin --rm a proposito. Con esa bandera un contenedor que muere al
+      # arrancar se borra solo, y el `docker logs` de mas abajo -que es lo unico
+      # que explica por que murio- contesta «No such container». El paso que
+      # existe para diagnosticar el arranque no podia diagnosticarlo.
+      #
+      # ACADEMIC_URL no es opcional: este servicio declara un upstream con
+      # defineUpstream('academic') y sin esa variable no levanta. Es
+      # deliberado -falla cerrado y el error nombra la variable-, y es la
+      # diferencia con un servicio recien generado, que no declara ninguno.
       - name: Run the image
         run: |
           set -euo pipefail
-          id=$(docker run --rm --detach --env NODE_ENV=development --publish 3000:3000 nova-nestjs-example:ci)
-          trap 'docker rm --force "$id" > /dev/null' EXIT
+          id=$(docker run --detach --env NODE_ENV=development --env ACADEMIC_URL=http://localhost:4010 --publish 3000:3000 nova-nestjs-example:ci)
+          trap 'docker rm --force "$id" > /dev/null 2>&1 || true' EXIT
 
           for attempt in $(seq 1 30); do
             if curl --silent --fail http://localhost:3000/health/live; then
