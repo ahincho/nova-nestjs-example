@@ -1,0 +1,24 @@
+# Lo que no entra al contexto de build.
+#
+# El Dockerfile lo comparten todos los servicios y vive en el toolchain; este
+# archivo no, porque Docker lo lee desde la raíz del contexto. Es la misma
+# división que con .gitignore: la lógica se comparte, lo que describe a este
+# repositorio se queda acá.
+#
+# `node_modules` es el que importa. Sin esta línea se copian los binarios
+# nativos compilados para Windows dentro de una imagen Linux, y el fallo
+# aparece recién al arrancar el contenedor.
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+.git/
+.github/
+
+.env
+.env.local
+
+# El token del registry vive en el ~/.npmrc de cada máquina y entra al build
+# como secreto de BuildKit, montado y no copiado. Que no llegue por accidente.
+.npmrc.local
