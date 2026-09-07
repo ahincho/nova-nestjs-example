@@ -90,6 +90,11 @@ jobs:
       # Montado como secreto llegaria el marcador y el build cortaria con un
       # 401. Se escribe uno con el valor ya resuelto, y viaja montado y no
       # copiado, asi que no queda en ninguna capa de la imagen.
+      # El montaje de cache de BuildKit vive en el runner, y el runner se
+      # destruye: sin exportarla, cada build de CI es frio.
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Docker
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -98,4 +103,4 @@ jobs:
             echo "@ahincho:registry=https://npm.pkg.github.com"
             echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN"
           } > "$RUNNER_TEMP/docker.npmrc"
-          pnpm docker --secret id=npmrc,src="$RUNNER_TEMP/docker.npmrc"
+          pnpm docker --secret id=npmrc,src="$RUNNER_TEMP/docker.npmrc"             --cache-from type=gha --cache-to type=gha,mode=max
