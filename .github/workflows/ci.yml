@@ -62,6 +62,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Las reglas de arquitectura del BFF, las mismas que emite el generador.
+      # Sin este paso el archivo existe y no lo mira nadie.
+      - name: Lint arch
+        run: pnpm lint:arch
+
       - name: Format
         run: pnpm format:check
 
@@ -73,3 +78,15 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      # El unico lugar donde la imagen se construye contra el registry de
+      # verdad. El CI de la plataforma instala tarballs y repone un .npmrc
+      # vacio, asi que alli el `--mount=type=secret` esta montado y nunca se
+      # usa: el 401 por una credencial mal pasada no lo ve nadie. Aca si, que
+      # es como la construye un servicio real.
+      #
+      # setup-node ya dejo el token en el npmrc del usuario, que es el que se
+      # monta como secreto - montado y no copiado, para que no quede en ninguna
+      # capa de la imagen.
+      - name: Docker
+        run: pnpm docker --secret id=npmrc,src=$HOME/.npmrc
