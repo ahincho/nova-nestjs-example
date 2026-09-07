@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { NovaModule } from '@ahincho/nova-nestjs';
-import { CoursesModule } from './courses/courses.module';
+import { CoursesModule } from './features/courses/courses.module';
 import { academic } from './upstream/academic/academic.config';
 import { AcademicModule } from './upstream/academic/academic.module';
 

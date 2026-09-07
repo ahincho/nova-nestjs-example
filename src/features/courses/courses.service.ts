@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   AcademicClient,
   type AcademicCourse,
-} from '../upstream/academic/academic.client';
+} from '../../upstream/academic/academic.client';
 import type { CourseResponse } from './dto/course.response';
 import type { ListCoursesQuery } from './dto/list-courses.query';
 

@@ -1,7 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { RequestContextService } from '@ahincho/nova-nestjs';
+import {
+  ApiEnvelope,
+  ApiErrors,
+  RequestContextService,
+} from '@ahincho/nova-nestjs';
 import { CoursesService } from './courses.service';
-import type { CourseResponse } from './dto/course.response';
+import { CourseResponse } from './dto/course.response';
 import { ListCoursesQuery } from './dto/list-courses.query';
 
 @Controller('courses')
@@ -16,17 +20,21 @@ export class CoursesController {
    * `{ success, status, data, errors }`; el controlador no arma el sobre.
    */
   @Get()
+  @ApiEnvelope(CourseResponse, { isArray: true })
+  @ApiErrors(400, 502, 504)
   list(@Query() query: ListCoursesQuery): Promise<CourseResponse[]> {
     return this.courses.list(query);
   }
 
   @Get(':id')
+  @ApiEnvelope(CourseResponse, { description: 'El curso pedido' })
+  @ApiErrors(404, 502, 504)
   findOne(@Param('id') id: string): Promise<CourseResponse> {
     return this.courses.findOne(id);
   }
 
   /**
-   * Solo para ver el contexto desde afuera: nada de produccion necesita leerlo
+   * Sólo para ver el contexto desde afuera: nada de producción necesita leerlo
    * a mano, porque el cliente HTTP y el logger ya lo hacen.
    */
   @Get('debug/context')

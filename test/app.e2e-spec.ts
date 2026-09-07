@@ -2,7 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types';
-import { validationExceptionFactory } from '@ahincho/nova-nestjs';
+import { setupOpenApi, validationExceptionFactory } from '@ahincho/nova-nestjs';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import type { Mock } from 'vitest';
@@ -79,6 +79,10 @@ describe('the example service', () => {
     app.setGlobalPrefix('api/v1', {
       exclude: ['health/live', 'health/ready', 'api/v1/health'],
     });
+
+    // El test no pasa por `bootstrap()`, asi que la documentacion se monta aca
+    // con la misma configuracion que main.ts.
+    setupOpenApi(app, { title: 'Nova Example', bearerAuth: false });
 
     await app.init();
   });
@@ -262,6 +266,74 @@ describe('the example service', () => {
       const response = await request(app.getHttpServer()).get('/health/live');
 
       expect(response.body).not.toHaveProperty('data');
+    });
+  });
+
+  // Lo que un `@nestjs/swagger` suelto no resuelve: el interceptor envuelve la
+  // respuesta DESPUES de que el controlador la devolvio, asi que un documento
+  // generado del tipo de retorno describe el metodo y no el cable.
+  describe('the OpenAPI document', () => {
+    type OpenApiDocument = {
+      info: { title: string };
+      components: { schemas: Record<string, unknown> };
+      paths: Record<
+        string,
+        Record<string, { responses: Record<string, { description: string }> }>
+      >;
+    };
+
+    async function document(): Promise<OpenApiDocument> {
+      const response = await request(app.getHttpServer())
+        .get('/docs/json')
+        .expect(200);
+
+      return response.body as OpenApiDocument;
+    }
+
+    it('is served outside the global prefix', async () => {
+      expect((await document()).info.title).toBe('Nova Example');
+    });
+
+    it('declares the envelope schema', async () => {
+      const { schemas } = (await document()).components;
+
+      expect(schemas).toHaveProperty('ApiEnvelopeSchema');
+      expect(schemas).toHaveProperty('ApiErrorItemSchema');
+      expect(schemas).toHaveProperty('CourseResponse');
+    });
+
+    it('describes the response as the envelope wrapping the dto', async () => {
+      const operation = (await document()).paths['/api/v1/courses/{id}']?.[
+        'get'
+      ];
+
+      expect(JSON.stringify(operation)).toContain(
+        '#/components/schemas/ApiEnvelopeSchema',
+      );
+      expect(JSON.stringify(operation)).toContain(
+        '#/components/schemas/CourseResponse',
+      );
+    });
+
+    it('names each failure with the code the filter would use', async () => {
+      const responses = (await document()).paths['/api/v1/courses/{id}']?.[
+        'get'
+      ]?.responses;
+
+      expect(responses?.['404']?.description).toBe('NOT_FOUND');
+
+      // Los dos fallos de upstream se documentan con el mismo codigo, porque
+      // es lo que el filtro devuelve: todo 5xx colapsa a INTERNAL_SERVER_ERROR
+      // a proposito, ya que distinguirle un 502 de un 504 a quien llama le
+      // cuenta como esta armada nuestra topologia.
+      expect(responses?.['502']?.description).toBe('INTERNAL_SERVER_ERROR');
+      expect(responses?.['504']?.description).toBe('INTERNAL_SERVER_ERROR');
+    });
+
+    // La documentacion no hereda el prefijo: si lo heredara, pasar de v1 a v2
+    // moveria el enlace que todo el mundo tiene guardado.
+    it('is not served under the versioned prefix', async () => {
+      await request(app.getHttpServer()).get('/api/v1/docs/json').expect(404);
     });
   });
 

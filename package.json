@@ -14,16 +14,20 @@
     "start:dev": "nova start --watch",
     "start:prod": "node dist/main",
     "test": "nova test",
+    "test:cov": "nova test:cov",
     "typecheck": "nova typecheck",
     "lint": "nova lint",
+    "lint:arch": "nova lint:arch",
     "format": "nova format",
-    "format:check": "nova format:check"
+    "format:check": "nova format:check",
+    "verify": "nova verify",
+    "docker": "nova docker"
   },
   "dependencies": {
-    "@ahincho/nova-nestjs": "^0.10.2"
+    "@ahincho/nova-nestjs": "^0.12.0"
   },
   "devDependencies": {
-    "@ahincho/nova-nestjs-schematics": "^0.10.2",
-    "@ahincho/nova-nestjs-toolchain": "^0.10.2"
+    "@ahincho/nova-nestjs-schematics": "^0.12.0",
+    "@ahincho/nova-nestjs-toolchain": "^0.12.0"
   }
 }
