@@ -14,6 +14,16 @@ minimumReleaseAgeExclude:
 # si la plataforma alguna vez publica una combinacion que no cierra.
 strictPeerDependencies: true
 
+# pnpm 10+ bloquea los scripts de instalación de las dependencias y aborta el
+# install si nadie decidió qué hacer con ellos.
+#
+# Va en false porque el script de `@scarf/scarf` es telemetría: le reporta al
+# mantenedor que alguien instaló el paquete. Llega arrastrado por
+# `swagger-ui-dist`, dentro de `@nestjs/swagger`, que la plataforma trae desde
+# la 0.12.0. Apagarlo no le quita nada: la documentación se sirve igual.
+allowBuilds:
+  '@scarf/scarf': false
+
 # Todo lo que este servicio usa llega dentro de los tres paquetes de la
 # plataforma, y pnpm aisla node_modules: un paquete transitivo no se puede
 # importar. Sin esto el `import { Module } from '@nestjs/common'` corta con
