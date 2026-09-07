@@ -104,6 +104,14 @@ proceso cierre. Sin esa ventana, las peticiones en vuelo del final de cada
 despliegue mueren. Conviene mayor al intervalo de la sonda del target group y
 menor al `stopTimeout` de la tarea.
 
+Mientras eso pasa, el proceso además contesta **503 a las peticiones que llegan
+por una conexión ya abierta** -que es como habla un balanceador- y deja terminar
+las que estaban en vuelo. Una conexión TCP nueva, en cambio, recibe
+`ECONNREFUSED`: el listener ya dejó de aceptar y no hay petición HTTP que
+contestar. **Probarlo con un `curl` suelto muestra el rechazo y no el 503**, así
+que parece roto cuando no lo está; el detalle medido está en el
+[doc de salud de la plataforma](https://github.com/ahincho/nova-nestjs/blob/main/packages/core/docs/health.md#el-503-del-apagado-es-sobre-conexiones-ya-abiertas).
+
 Un chequeo de disponibilidad **no llama al upstream a propósito**. Si `ready`
 cayera cuando `academic` se cae, el orquestador reiniciaría tareas sanas de este
 servicio por un problema ajeno, y una caída de un upstream se convertiría en una

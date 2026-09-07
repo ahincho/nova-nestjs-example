@@ -20,10 +20,10 @@
     "format:check": "nova format:check"
   },
   "dependencies": {
-    "@ahincho/nova-nestjs": "^0.10.0"
+    "@ahincho/nova-nestjs": "^0.10.2"
   },
   "devDependencies": {
-    "@ahincho/nova-nestjs-schematics": "^0.10.0",
-    "@ahincho/nova-nestjs-toolchain": "^0.10.0"
+    "@ahincho/nova-nestjs-schematics": "^0.10.2",
+    "@ahincho/nova-nestjs-toolchain": "^0.10.2"
   }
 }
