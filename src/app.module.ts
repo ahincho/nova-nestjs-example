@@ -19,11 +19,17 @@ import { AcademicModule } from './upstream/academic/academic.module';
         // en paralelo hasta que la infraestructura apunte a la nueva.
         legacyPath: 'api/v1/health',
 
-        // Tras SIGTERM el servicio sigue respondiendo, pero `ready` y la ruta
-        // heredada pasan a 503 durante esta ventana. Le da al balanceador
-        // tiempo de sacar la tarea de rotación antes de que el proceso cierre,
-        // que es lo que evita los errores del final de cada despliegue.
-        // Conviene mayor al intervalo de la sonda y menor al stopTimeout.
+        // Tras SIGTERM el servicio sigue vivo esta ventana y termina lo que
+        // tenga en vuelo; `ready` y la ruta heredada contestan 503 mientras
+        // tanto.
+        //
+        // No es esto lo que saca la tarea de rotación: ECS desregistra el
+        // target y espera el deregistration delay ANTES de mandar la señal,
+        // así que cuando el proceso se entera ya no le llega tráfico. Esta
+        // ventana existe para que no se corte una petición a la mitad.
+        //
+        // Menor que el stopTimeout de la tarea -30 s por defecto-, porque
+        // pasado ese plazo llega un SIGKILL a mitad del drenaje.
         gracefulShutdownTimeoutMs: 5000,
 
         readinessChecks: [
