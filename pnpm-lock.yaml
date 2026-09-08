@@ -9,29 +9,29 @@ importers:
   .:
     dependencies:
       '@ahincho/nova-nestjs':
-        specifier: ^0.14.1
-        version: 0.14.1(supports-color@8.1.1)
+        specifier: ^0.15.0
+        version: 0.15.0(supports-color@8.1.1)
     devDependencies:
       '@ahincho/nova-nestjs-schematics':
-        specifier: ^0.14.1
-        version: 0.14.1(chokidar@5.0.0)
+        specifier: ^0.15.0
+        version: 0.15.0(chokidar@5.0.0)
       '@ahincho/nova-nestjs-toolchain':
-        specifier: ^0.14.1
-        version: 0.14.1(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(@nestjs/platform-express@12.0.1(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(supports-color@8.1.1))(chokidar@5.0.0)(fork-ts-checker-webpack-plugin@9.1.0(typescript@6.0.3)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3)))(supports-color@8.1.1)(tsconfig-paths-webpack-plugin@4.2.0)(vite@8.2.2(@types/node@24.13.3)(terser@5.51.2))(webpack-node-externals@3.0.0)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3))
+        specifier: ^0.15.0
+        version: 0.15.0(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(@nestjs/platform-express@12.0.1(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(supports-color@8.1.1))(chokidar@5.0.0)(fork-ts-checker-webpack-plugin@9.1.0(typescript@6.0.3)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3)))(supports-color@8.1.1)(tsconfig-paths-webpack-plugin@4.2.0)(vite@8.2.2(@types/node@24.13.3)(terser@5.51.2))(webpack-node-externals@3.0.0)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3))
 
 packages:
 
-  '@ahincho/nova-nestjs-schematics@0.14.1':
-    resolution: {integrity: sha512-0pihDw4orE1HJS1wid25Ex7HoI8usYNXPWHTqjWI4wNillRXVvqALH1Jdo2g8Wa8/3NRJu4e0SPq/kKK8oOyiQ==, tarball: https://npm.pkg.github.com/download/@ahincho/nova-nestjs-schematics/0.14.1/edb9d85d3b0803f4af3ff58561953db52f0cd2db}
+  '@ahincho/nova-nestjs-schematics@0.15.0':
+    resolution: {integrity: sha512-290uf19j6rdFTK8ZbH3kRZYJMeLC4BZJBoztfZnlBNXAbbPzRYGSzL45WBb2fUQ46Afas66f/WBAPqn91L4/4w==, tarball: https://npm.pkg.github.com/download/@ahincho/nova-nestjs-schematics/0.15.0/e248da3109690795d1574ec1533664dda1c15aea}
     engines: {node: '>=24.15'}
     hasBin: true
 
-  '@ahincho/nova-nestjs-toolchain@0.14.1':
-    resolution: {integrity: sha512-Xv6xrI9QjeN7x/yaCtXgGzGQTQRh7zx6JlixgBdKSp3oVx1dm6VkJ8qJ/lLEo8ZuZKwMI/p6YRq/On2uJnYCbA==, tarball: https://npm.pkg.github.com/download/@ahincho/nova-nestjs-toolchain/0.14.1/719373731e9185c90d23e21302b2f407e6390bbd}
+  '@ahincho/nova-nestjs-toolchain@0.15.0':
+    resolution: {integrity: sha512-u0gGTSKvvXovntbYmeApsLfe5wu79DtrvNGUClmz+7KywZ6VsJ9jLD4r+rlkT16Hb02fdNKtuS9sTNjdRga0Gg==, tarball: https://npm.pkg.github.com/download/@ahincho/nova-nestjs-toolchain/0.15.0/eedf8985d758000cb794eecae10dc955af5ca5f0}
     hasBin: true
 
-  '@ahincho/nova-nestjs@0.14.1':
-    resolution: {integrity: sha512-c9R+n0MtpIS7vK0eP/0ZZZbda0Fm8FsYxqULHT6El7qfRYGqZqxofHMuNJdmWe2iQwU6ZQa7hkZr7roZaXiYLQ==, tarball: https://npm.pkg.github.com/download/@ahincho/nova-nestjs/0.14.1/274013e9ed940a60c77b5d0f8e6128fc512123d5}
+  '@ahincho/nova-nestjs@0.15.0':
+    resolution: {integrity: sha512-d9zIxdByW2tR8D5MRK1K14O22J3cFIJRqUKfNtPed4yjzjW0BYp1xOdFWXB6XIcYoQ3grmuwaK2mElQ7IJd95Q==, tarball: https://npm.pkg.github.com/download/@ahincho/nova-nestjs/0.15.0/4333a67e73ea74acc4776e0b1863fed2a3f9cf41}
     engines: {node: '>=24.15'}
 
   '@angular-devkit/core@22.1.5':
@@ -2253,7 +2253,7 @@ packages:
 
 snapshots:
 
-  '@ahincho/nova-nestjs-schematics@0.14.1(chokidar@5.0.0)':
+  '@ahincho/nova-nestjs-schematics@0.15.0(chokidar@5.0.0)':
     dependencies:
       '@angular-devkit/core': 22.1.5(chokidar@5.0.0)
       '@angular-devkit/schematics': 22.1.5(chokidar@5.0.0)
@@ -2261,7 +2261,7 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@ahincho/nova-nestjs-toolchain@0.14.1(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(@nestjs/platform-express@12.0.1(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(supports-color@8.1.1))(chokidar@5.0.0)(fork-ts-checker-webpack-plugin@9.1.0(typescript@6.0.3)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3)))(supports-color@8.1.1)(tsconfig-paths-webpack-plugin@4.2.0)(vite@8.2.2(@types/node@24.13.3)(terser@5.51.2))(webpack-node-externals@3.0.0)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3))':
+  '@ahincho/nova-nestjs-toolchain@0.15.0(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(@nestjs/platform-express@12.0.1(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.0.1)(supports-color@8.1.1))(chokidar@5.0.0)(fork-ts-checker-webpack-plugin@9.1.0(typescript@6.0.3)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3)))(supports-color@8.1.1)(tsconfig-paths-webpack-plugin@4.2.0)(vite@8.2.2(@types/node@24.13.3)(terser@5.51.2))(webpack-node-externals@3.0.0)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3))':
     dependencies:
       '@nestjs/cli': 12.0.0(@types/node@24.13.3)(fork-ts-checker-webpack-plugin@9.1.0(typescript@6.0.3)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3)))(prettier@3.9.6)(tsconfig-paths-webpack-plugin@4.2.0)(webpack-node-externals@3.0.0)(webpack@5.106.2(lightningcss@1.33.0)(postcss@8.5.28)(uglify-js@3.19.3))
       '@nestjs/schematics': 12.0.0(chokidar@5.0.0)(prettier@3.9.6)(typescript@6.0.3)
@@ -2305,7 +2305,7 @@ snapshots:
       - webpack
       - webpack-node-externals
 
-  '@ahincho/nova-nestjs@0.14.1(supports-color@8.1.1)':
+  '@ahincho/nova-nestjs@0.15.0(supports-color@8.1.1)':
     dependencies:
       '@nestjs/common': 12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
       '@nestjs/config': 12.0.0(@nestjs/common@12.0.1(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(rxjs@7.8.2)
